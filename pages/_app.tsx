@@ -52,16 +52,10 @@ const chainsConfigured: Chain[] = [
   },
 ];
 
-const { chains, provider } = configureChains(
-  [
-    // ...chainsConfigured
-    chain.mainnet,
-  ],
-  [
-    // alchemyProvider({ alchemyId }),
-    publicProvider(),
-  ]
-);
+const { chains, provider } = configureChains(chainsConfigured, [
+  // alchemyProvider({ alchemyId }),
+  publicProvider(),
+]);
 
 const { connectors } = getDefaultWallets({
   appName: "Mining Transfer",

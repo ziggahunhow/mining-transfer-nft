@@ -19,37 +19,37 @@ export const TTStaking = () => {
   const { data: signerData } = useSigner();
   const { address } = useAccount();
 
-  // const ttStakingAddress = addresses[chainId].TTStaking;
-  // const ttMiningAddress = addresses[chainId].Mining;
+  const ttStakingAddress = addresses[chainId].TTStaking;
+  const ttMiningAddress = addresses[chainId].Mining;
 
-  // const ttStakingContract = useContract({
-  //   addressOrName: ttStakingAddress,
-  //   contractInterface: ttStakingABI,
-  //   signerOrProvider: signerData,
-  // });
+  const ttStakingContract = useContract({
+    addressOrName: ttStakingAddress,
+    contractInterface: ttStakingABI,
+    signerOrProvider: signerData,
+  });
 
-  // const ttMiningContract = useContract({
-  //   addressOrName: ttMiningAddress,
-  //   contractInterface: ttMiningABI,
-  //   signerOrProvider: signerData,
-  // });
+  const ttMiningContract = useContract({
+    addressOrName: ttMiningAddress,
+    contractInterface: ttMiningABI,
+    signerOrProvider: signerData,
+  });
 
   const onSelectTokenID = (e: any) => settokenID(e.target.value);
   const onSelectTokenType = (e: any) => settokenType(e.target.value);
 
-  // const contract = tokenType === "TT" ? ttStakingContract : ttMiningContract;
+  const contract = tokenType === "TT" ? ttStakingContract : ttMiningContract;
 
   const getNFT = useCallback(async () => {
-    // if (signerData) {
-    //   const balanceOfOwner = await contract.balanceOf(address);
-    //   let promises = [];
-    //   for (let i = 0; i < balanceOfOwner.toNumber(); i++) {
-    //     promises.push(contract.tokenOfOwnerByIndex(address, i));
-    //   }
-    //   const ids = await Promise.all(promises);
-    //   setuserOwnedTokenIDS(ids);
-    // }
-  }, [address, signerData, tokenType]);
+    if (signerData) {
+      const balanceOfOwner = await contract.balanceOf(address);
+      let promises = [];
+      for (let i = 0; i < balanceOfOwner.toNumber(); i++) {
+        promises.push(contract.tokenOfOwnerByIndex(address, i));
+      }
+      const ids = await Promise.all(promises);
+      setuserOwnedTokenIDS(ids);
+    }
+  }, [address, signerData, tokenType, contract]);
 
   useEffect(() => {
     getNFT();
@@ -65,43 +65,43 @@ export const TTStaking = () => {
     }
   }, [signerData]);
 
-  // const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-  //   try {
-  //     if (!ethers.utils.isAddress(to.toLowerCase()))
-  //       throw new Error("custom: send to address is not valid");
+    try {
+      if (!ethers.utils.isAddress(to.toLowerCase()))
+        throw new Error("custom: send to address is not valid");
 
-  //     setLoading(true);
+      setLoading(true);
 
-  //     if (tokenID === "All") {
-  //       for (let i = 0; i < userOwnedTokenIDS.length; i++) {
-  //         const token = userOwnedTokenIDS[i];
-  //         const tx = await contract.transferFrom(address, to, token);
-  //         await tx.wait();
-  //       }
-  //     } else {
-  //       const tx = await contract.transferFrom(address, to, tokenID);
-  //       await tx.wait();
-  //     }
+      if (tokenID === "All") {
+        for (let i = 0; i < userOwnedTokenIDS.length; i++) {
+          const token = userOwnedTokenIDS[i];
+          const tx = await contract.transferFrom(address, to, token);
+          await tx.wait();
+        }
+      } else {
+        const tx = await contract.transferFrom(address, to, tokenID);
+        await tx.wait();
+      }
 
-  //     getNFT();
+      getNFT();
 
-  //     setError("");
-  //     setLoading(false);
-  //     alert("success");
-  //   } catch (error) {
-  //     console.log("error:", error);
-  //     // @ts-ignore
-  //     if (error.message.startsWith("custom:")) {
-  //       // @ts-ignore
-  //       setError(error.message.split("custom:")[1]);
-  //     } else {
-  //       setError("txn failed, check contract");
-  //     }
-  //     setLoading(false);
-  //   }
-  // };
+      setError("");
+      setLoading(false);
+      alert("success");
+    } catch (error) {
+      console.log("error:", error);
+      // @ts-ignore
+      if (error.message.startsWith("custom:")) {
+        // @ts-ignore
+        setError(error.message.split("custom:")[1]);
+      } else {
+        setError("txn failed, check contract");
+      }
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -110,7 +110,7 @@ export const TTStaking = () => {
   return (
     <div style={{ margin: "20px" }}>
       <h1 className="mb-4 text-lg">Mining transfer tool</h1>
-      <form className="mr-4">
+      <form onSubmit={(e) => handleSubmit(e)} className="mr-4">
         {address && userOwnedTokenIDS.length === 0 && (
           <h3 className="my-2 mb-4" style={{ color: "red" }}>
             You have no Mining NFT
